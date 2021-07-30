@@ -1,20 +1,12 @@
-.. {{ name }} documentation master file, created by
+.. k3rangeset documentation master file, created by
    sphinx-quickstart on Thu May 14 16:58:55 2020.
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-{{ name }}
+k3rangeset
 ============
 
-.. automodule:: {{ name }}
-
-.. toctree::
-   :maxdepth: 2
-   :caption: Contents:
-
-.. contents::
-   :depth: 4
-   :local:
+.. automodule:: k3rangeset
 
 Documentation for the Code
 **************************
@@ -22,20 +14,27 @@ Documentation for the Code
 Exceptions
 ----------
 
-.. autoexception::  SomeError
+.. autoexception::  RangeException
 
 
 Classes
 ----------
 
-.. autoclass::  Bar
-    :members:
+.. autoclass::  ValueRange
+
+.. autoclass::  IntIncRange
+
+.. autoclass::  IntIncRangeSet
 
 
 Functions
 ---------
 
-.. autofunction::  foo
+.. autofunction::  intersect
+
+.. autofunction::  substract
+
+.. autofunction::  union
 
 Indices and tables
 ==================

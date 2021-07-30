@@ -1,0 +1,6 @@
+_extends: gh-config
+
+repository:
+  description: segmented range which is represented in a list of sorted interleaving range.
+  homepage: https://blog.openacid.com
+  topics: python, set
