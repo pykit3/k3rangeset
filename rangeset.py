@@ -6,12 +6,25 @@ int_types = (int, int)
 list_like = (type([]), type(()))
 
 compatible_types = {
-    type(None): (type(None), ),
-    int:        (type(None), int, ),
-    float:      (type(None), int, float, ),
-    str:        (type(None), str),
-    tuple:      (type(None), tuple, ),
-    list:       (type(None), list, ),
+    type(None): (type(None),),
+    int: (
+        type(None),
+        int,
+    ),
+    float: (
+        type(None),
+        int,
+        float,
+    ),
+    str: (type(None), str),
+    tuple: (
+        type(None),
+        tuple,
+    ),
+    list: (
+        type(None),
+        list,
+    ),
 }
 
 
@@ -24,19 +37,17 @@ class Unmergeable(RangeException):
 
 
 class ValueRange(list):
-
     def __init__(self, left, right, val=None):
-
         assert_compatible(left, right)
 
         if cmp_boundary(left, right) > 0:
-            raise ValueError('left not smaller or equal right: {left}, {right}'.format(
-                left=repr(left), right=repr(right)))
+            raise ValueError(
+                "left not smaller or equal right: {left}, {right}".format(left=repr(left), right=repr(right))
+            )
 
         super(ValueRange, self).__init__([left, right, val])
 
     def cmp(self, b):
-
         # if a and b can be merged into one range, we say a == b
         #
         # Different from Range: adjacent ValueRange-s are not equal,
@@ -52,7 +63,6 @@ class ValueRange(list):
         return 0
 
     def intersect(self, b):
-
         if self.cmp(b) != 0:
             return None
 
@@ -74,16 +84,13 @@ class ValueRange(list):
         return rst
 
     def substract(self, b):
-
         if self.cmp(b) > 0:
             # keep value for ValueRange
-            return [None,
-                    self.dup() + self[2:]]
+            return [None, self.dup() + self[2:]]
 
         if self.cmp(b) < 0:
             # keep value for ValueRange
-            return [self.dup() + self[2:],
-                    None]
+            return [self.dup() + self[2:], None]
 
         # keep value for ValueRange
         rst = [None, None]
@@ -122,22 +129,19 @@ class ValueRange(list):
         :param pos: is the value to check.
         :return: bool
         """
-        return (self.cmp_left(pos) <= 0
-                and self.cmp_right(pos) > 0)
+        return self.cmp_left(pos) <= 0 and self.cmp_right(pos) > 0
 
     def length(self):
         if self[0] is None or self[1] is None:
-            return float('inf')
+            return float("inf")
 
         if isinstance(self[0], str):
-
             a, b = self[:2]
-            l = max([len(a), len(b)])
+            max_len = max([len(a), len(b)])
 
             rst = 0.0
             ratio = 1.0
-            for i in range(l):
-
+            for i in range(max_len):
                 if i >= len(a):
                     va = 0.0
                 else:
@@ -175,12 +179,14 @@ class ValueRange(list):
     def __rand__(self, b):
         return self.intersect(b)
 
+
 class Range(ValueRange):
     """
     A continuous range.
     Range is left-close and right-open.
     E.g. a range `[1, 3]` has 2 elements `1` and `2`, but `3` is not in this range.
     """
+
     def __init__(self, left, right):
         """
         :param left: specifies the left close boundary, which means `left` is in in this range.
@@ -189,8 +195,9 @@ class Range(ValueRange):
         assert_compatible(left, right)
 
         if cmp_boundary(left, right) > 0:
-            raise ValueError('left not smaller or equal right: {left}, {right}'.format(
-                left=repr(left), right=repr(right)))
+            raise ValueError(
+                "left not smaller or equal right: {left}, {right}".format(left=repr(left), right=repr(right))
+            )
 
         super(ValueRange, self).__init__([left, right])
 
@@ -223,24 +230,20 @@ class IntIncRange(Range):
     limits value types to int or long, and its right boundary is closed, thus unlike
     `Range`(right boundary is open), 2 is in `[1, 2]`.
     """
-    def __init__(self, left, right):
 
+    def __init__(self, left, right):
         if left is not None and type(left) not in int_types:
-            raise TypeError('{l} {ltyp} is not int or None'.format(
-                l=left, ltyp=type(left)))
+            raise TypeError("{l} {ltyp} is not int or None".format(l=left, ltyp=type(left)))
 
         if right is not None and type(right) not in int_types:
-            raise TypeError('{r} {rtyp} is not int or None'.format(
-                r=right, rtyp=type(right)))
+            raise TypeError("{r} {rtyp} is not int or None".format(r=right, rtyp=type(right)))
 
         if cmp_boundary(left, right) > 0:
-            raise ValueError('left not smaller or equal right: {left}, {right}'.format(
-                left=left, right=right))
+            raise ValueError("left not smaller or equal right: {left}, {right}".format(left=left, right=right))
 
         list.__init__(self, [left, right])
 
     def cmp(self, b):
-
         # if a and b can be merged into one range, we say a == b
 
         if None not in (self[0], b[1]) and self[0] - b[1] > 1:
@@ -253,18 +256,18 @@ class IntIncRange(Range):
         return 0
 
     def is_adjacent(self, b):
-        return (None not in (b[0], self[1])
-                and self[1] + 1 == b[0])
+        return None not in (b[0], self[1]) and self[1] + 1 == b[0]
 
     def has(self, pos):
-
-        return (cmp_val(self[0], pos, none_cmp_finite=-1) <= 0
-                and cmp_val(pos, self[1], none_cmp_finite=1) <= 0
-                and type(pos) in int_types)
+        return (
+            cmp_val(self[0], pos, none_cmp_finite=-1) <= 0
+            and cmp_val(pos, self[1], none_cmp_finite=1) <= 0
+            and type(pos) in int_types
+        )
 
     def length(self):
         if None in self:
-            return float('inf')
+            return float("inf")
 
         return self[1] - self[0] + 1
 
@@ -288,6 +291,7 @@ class RangeDict(list):
     but can not exist in `RangeSet`.
     Because in `RangeDict` each range there is a value bound.
     """
+
     default_range_clz = ValueRange
 
     # dimension = 1 indicates the value is a RangeDict whose value is any type.
@@ -312,32 +316,29 @@ class RangeDict(list):
             self.dimension = int(dimension)
 
         if self.dimension < 1:
-            raise ValueError('dimension must >= 1, but: {d}'.format(
-                d=self.dimension))
+            raise ValueError("dimension must >= 1, but: {d}".format(d=self.dimension))
 
         self.range_clz = range_clz or self.default_range_clz
 
-        super(RangeDict, self).__init__([self.range_clz(*x)
-                                         for x in iterable])
+        super(RangeDict, self).__init__([self.range_clz(*x) for x in iterable])
 
         for i in range(0, len(self) - 1):
             if self[i].cmp(self[i + 1]) != -1:
-                raise ValueError('range[{i}] {ri} does not smaller than range[{j}] {ripp}'.format(
-                    i=i,
-                    j=i + 1,
-                    ri=self[i],
-                    ripp=self[i + 1],
-                ))
+                raise ValueError(
+                    "range[{i}] {ri} does not smaller than range[{j}] {ripp}".format(
+                        i=i,
+                        j=i + 1,
+                        ri=self[i],
+                        ripp=self[i + 1],
+                    )
+                )
 
         if self.dimension > 1:
             for rng in self:
                 v = rng.val()
                 if v is not None:
-                    v = self.__class__(v,
-                                       range_clz=self.range_clz,
-                                       dimension=self.dimension-1)
+                    v = self.__class__(v, range_clz=self.range_clz, dimension=self.dimension - 1)
                     rng.set(v)
-
 
     def add(self, rng, val=None):
         """
@@ -346,35 +347,30 @@ class RangeDict(list):
         :param val: value of any data type.
         :return: Nothing
         """
-        if (val is not None
-                and self.dimension > 1):
-
-            val = self.__class__(val, range_clz=self.range_clz,
-                                 dimension=self.dimension-1)
+        if val is not None and self.dimension > 1:
+            val = self.__class__(val, range_clz=self.range_clz, dimension=self.dimension - 1)
 
         rng = _to_range(self.range_clz, list(rng) + [val])
 
         i = bisect_left(self, rng)
 
         while i < len(self):
-
             if rng.cmp(self[i]) == 0:
-
-                l, r = substract_range(self[i], rng)
-                if l is None:
-                    if r is None:
+                left, right = substract_range(self[i], rng)
+                if left is None:
+                    if right is None:
                         self.pop(i)
                     else:
-                        self[i] = r
+                        self[i] = right
                         i += 1
                 else:
-                    if r is None:
-                        self[i] = l
+                    if right is None:
+                        self[i] = left
                         i += 1
                     else:
                         self.pop(i)
-                        self.insert(i, r)
-                        self.insert(i, l)
+                        self.insert(i, right)
+                        self.insert(i, left)
                         i += 2
             else:
                 break
@@ -402,7 +398,7 @@ class RangeDict(list):
         i = bisect_left(self, rng)
 
         if i == len(self) or not self[i].has(pos):
-            raise KeyError('not in range: ' + repr(pos))
+            raise KeyError("not in range: " + repr(pos))
 
         v = self[i].val()
 
@@ -410,7 +406,7 @@ class RangeDict(list):
             if len(positions) + 1 <= self.dimension:
                 v = v.get(*positions)
             else:
-                raise TypeError('too many position to get')
+                raise TypeError("too many position to get")
         return v
 
     def get_min(self, is_lt=None):
@@ -435,8 +431,11 @@ class RangeDict(list):
         if len(self) == 0:
             raise ValueError("range dict is empty")
 
+        def default_is_lt(a, b):
+            return a < b
+
         if is_lt is None:
-            is_lt = lambda a, b: a < b
+            is_lt = default_is_lt
 
         min_val_idx = 0
         for i in range(1, len(self)):
@@ -448,7 +447,6 @@ class RangeDict(list):
         return min_val_idx, min_val_rng, min_val_rng.val()
 
     def has(self, pos):
-
         rng = [pos, None]
         i = bisect_left(self, rng)
 
@@ -472,7 +470,7 @@ class RangeDict(list):
         i = 0
         while i < len(self) - 1:
             curr = self[i]
-            nxt = self[i+1]
+            nxt = self[i + 1]
 
             if not curr.is_adjacent(nxt):
                 i += 1
@@ -482,7 +480,7 @@ class RangeDict(list):
             if curr[2:] == nxt[2:]:
                 o = [curr[0], nxt[1]] + curr[2:]
                 self[i] = self.range_clz(*o)
-                self.pop(i+1)
+                self.pop(i + 1)
             else:
                 i += 1
                 continue
@@ -498,9 +496,7 @@ class RangeDict(list):
 
         i = bisect_left(self, rng)
         while i < len(self):
-
             if self[i].cmp(rng) == 0:
-
                 if self[i].intersect(rng) is not None:
                     rst.append(self.range_clz(*self[i]))
                 else:
@@ -518,6 +514,7 @@ class RangeSet(RangeDict):
     A series of int `Range`.
     All ranges in it are ascending ordered, non-overlapping and non-adjacent.
     """
+
     default_range_clz = Range
 
     def add(self, rng):
@@ -546,6 +543,7 @@ class IntIncRangeSet(RangeSet):
     It is similiar to `RangeSet` and shares the same set of API, except the default
     class for element in it is `IntIncRange`, not `Range`.
     """
+
     default_range_clz = IntIncRange
 
 
@@ -563,7 +561,6 @@ def union(a, *bs):
 
 
 def _union(a, b):
-
     if len(a) == 0:
         return RangeSet(b, range_clz=b.range_clz)
 
@@ -576,7 +573,6 @@ def _union(a, b):
     rng = a[0]
 
     while i < len(a) or j < len(b):
-
         a_ge_b = None
 
         if i == len(a):
@@ -619,7 +615,6 @@ def substract(a, *bs):
 
 
 def _substract(a, b):
-
     if len(a) == 0:
         return a.__class__([], range_clz=a.range_clz, dimension=a.dimension)
 
@@ -629,7 +624,6 @@ def _substract(a, b):
     rst = []
 
     for ra in a:
-
         sb = a.range_clz(*ra)
 
         j = bisect_left(b, ra)
@@ -665,39 +659,35 @@ def intersect(a, b):
 
 def assert_type_valid(typ):
     if typ not in compatible_types:
-        raise TypeError('{typ} is not comparable'.format(typ=typ))
+        raise TypeError("{typ} is not comparable".format(typ=typ))
 
 
 def _to_range(range_clz, rng):
-
     # rangeset is 2 element iterable, rangedict is 3 element iterable
     if len(rng) < 2:
-        raise ValueError('range length is at least 2 but {l}: {rng}'.format(
-            l=len(rng), rng=rng))
+        raise ValueError("range length is at least 2 but {l}: {rng}".format(l=len(rng), rng=rng))
 
     return range_clz(*rng)
 
 
-def cmp_boundary(l, r):
-
-    if l is None:
+def cmp_boundary(left, right):
+    if left is None:
         # left is -inf
         return -1
 
-    if r is None:
+    if right is None:
         # right is inf
         return -1
 
-    if l < r:
+    if left < right:
         return -1
-    elif l > r:
+    elif left > right:
         return 1
     else:
         return 0
 
 
 def cmp_val(a, b, none_cmp_finite=1):
-
     # compare two value. any of them can be None.
     # None means positive infinite or negative infinite, defined by none_cmp_finite
 
@@ -721,7 +711,6 @@ def cmp_val(a, b, none_cmp_finite=1):
 
 
 def union_range(a, b):
-
     if a.cmp(b) != 0:
         raise Unmergeable(a, b)
 
@@ -743,12 +732,11 @@ def substract_range(a, b):
 
 
 def bisect_left(a, x, lo=0, hi=None):
-
     # Find the left-most i so that a[i] >= x
     # Thus i is where to a.insert(i, x)
 
     if lo < 0:
-        raise ValueError('lo must be non-negative')
+        raise ValueError("lo must be non-negative")
 
     if hi is None:
         hi = len(a)
@@ -762,20 +750,23 @@ def bisect_left(a, x, lo=0, hi=None):
     return lo
 
 
-def assert_compatible(l, r):
-    if not is_compatible(l, r):
-        raise TypeError('{l} {ltyp} is incompatible with {r} {rtyp}'.format(
-            l=repr(l), ltyp=type(l), r=repr(r), rtyp=type(r)))
+def assert_compatible(left, right):
+    if not is_compatible(left, right):
+        raise TypeError(
+            "{left} {ltyp} is incompatible with {right} {rtyp}".format(
+                left=repr(left), ltyp=type(left), right=repr(right), rtyp=type(right)
+            )
+        )
 
 
-def is_compatible(l, r):
-    if l is None or r is None:
+def is_compatible(left, right):
+    if left is None or right is None:
         return True
 
-    if type(l) in compatible_types.get(type(r), ()):
+    if type(left) in compatible_types.get(type(right), ()):
         return True
 
-    if type(r) in compatible_types.get(type(l), ()):
+    if type(right) in compatible_types.get(type(left), ()):
         return True
 
     return False

@@ -5,11 +5,9 @@ A range set can be thought as: `[[1, 2], [5, 7]]`.
 
 """
 
-# from .proc import CalledProcessError
-# from .proc import ProcError
+from importlib.metadata import version
 
-__version__ = "0.1.0"
-__name__ = "k3rangeset"
+__version__ = version("k3rangeset")
 
 from .rangeset import (
     IntIncRange,
@@ -18,11 +16,8 @@ from .rangeset import (
     RangeDict,
     RangeSet,
     ValueRange,
-
     RangeException,
-
     substract_range,
-
     intersect,
     substract,
     union,
@@ -35,11 +30,8 @@ __all__ = [
     "RangeDict",
     "RangeSet",
     "ValueRange",
-
     "RangeException",
-
     "substract_range",
-
     "intersect",
     "substract",
     "union",
