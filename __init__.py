@@ -14,12 +14,12 @@ from .rangeset import (
     IntIncRangeSet,
     Range,
     RangeDict,
+    RangeException,
     RangeSet,
     ValueRange,
-    RangeException,
-    substract_range,
     intersect,
     substract,
+    substract_range,
     union,
 )
 
@@ -28,11 +28,11 @@ __all__ = [
     "IntIncRangeSet",
     "Range",
     "RangeDict",
+    "RangeException",
     "RangeSet",
     "ValueRange",
-    "RangeException",
-    "substract_range",
     "intersect",
     "substract",
+    "substract_range",
     "union",
 ]

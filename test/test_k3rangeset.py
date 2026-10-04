@@ -1,11 +1,10 @@
-#!/usr/bin/env python2
-# coding: utf-8
-
 import logging
 import unittest
+from typing import ClassVar
+
+import k3ut
 
 import k3rangeset
-import k3ut
 
 dd = k3ut.dd
 
@@ -343,7 +342,7 @@ class TestRangeSet(unittest.TestCase):
 
             try:
                 k3rangeset.RangeSet(rs)
-            except Exception as e:
+            except ValueError as e:
                 dd(repr(e))
             self.assertRaises(ValueError, k3rangeset.RangeSet, rs)
 
@@ -1089,7 +1088,7 @@ class TestRangeDictMultiDimension(unittest.TestCase):
         0    1    2
     """
 
-    inp = [
+    inp: ClassVar[list] = [
         [
             0,
             1,

@@ -1,7 +1,3 @@
-#!/usr/bin/env python2
-# coding: utf-8
-
-
 int_types = (int, int)
 list_like = (type([]), type(()))
 
@@ -41,11 +37,9 @@ class ValueRange(list):
         assert_compatible(left, right)
 
         if cmp_boundary(left, right) > 0:
-            raise ValueError(
-                "left not smaller or equal right: {left}, {right}".format(left=repr(left), right=repr(right))
-            )
+            raise ValueError(f"left not smaller or equal right: {left!r}, {right!r}")
 
-        super(ValueRange, self).__init__([left, right, val])
+        super().__init__([left, right, val])
 
     def cmp(self, b):
         # if a and b can be merged into one range, we say a == b
@@ -195,9 +189,7 @@ class Range(ValueRange):
         assert_compatible(left, right)
 
         if cmp_boundary(left, right) > 0:
-            raise ValueError(
-                "left not smaller or equal right: {left}, {right}".format(left=repr(left), right=repr(right))
-            )
+            raise ValueError(f"left not smaller or equal right: {left!r}, {right!r}")
 
         super(ValueRange, self).__init__([left, right])
 
@@ -233,13 +225,13 @@ class IntIncRange(Range):
 
     def __init__(self, left, right):
         if left is not None and type(left) not in int_types:
-            raise TypeError("{l} {ltyp} is not int or None".format(l=left, ltyp=type(left)))
+            raise TypeError(f"{left} {type(left)} is not int or None")
 
         if right is not None and type(right) not in int_types:
-            raise TypeError("{r} {rtyp} is not int or None".format(r=right, rtyp=type(right)))
+            raise TypeError(f"{right} {type(right)} is not int or None")
 
         if cmp_boundary(left, right) > 0:
-            raise ValueError("left not smaller or equal right: {left}, {right}".format(left=left, right=right))
+            raise ValueError(f"left not smaller or equal right: {left}, {right}")
 
         list.__init__(self, [left, right])
 
@@ -316,22 +308,15 @@ class RangeDict(list):
             self.dimension = int(dimension)
 
         if self.dimension < 1:
-            raise ValueError("dimension must >= 1, but: {d}".format(d=self.dimension))
+            raise ValueError(f"dimension must >= 1, but: {self.dimension}")
 
         self.range_clz = range_clz or self.default_range_clz
 
-        super(RangeDict, self).__init__([self.range_clz(*x) for x in iterable])
+        super().__init__([self.range_clz(*x) for x in iterable])
 
-        for i in range(0, len(self) - 1):
+        for i in range(len(self) - 1):
             if self[i].cmp(self[i + 1]) != -1:
-                raise ValueError(
-                    "range[{i}] {ri} does not smaller than range[{j}] {ripp}".format(
-                        i=i,
-                        j=i + 1,
-                        ri=self[i],
-                        ripp=self[i + 1],
-                    )
-                )
+                raise ValueError(f"range[{i}] {self[i]} does not smaller than range[{i + 1}] {self[i + 1]}")
 
         if self.dimension > 1:
             for rng in self:
@@ -659,13 +644,13 @@ def intersect(a, b):
 
 def assert_type_valid(typ):
     if typ not in compatible_types:
-        raise TypeError("{typ} is not comparable".format(typ=typ))
+        raise TypeError(f"{typ} is not comparable")
 
 
 def _to_range(range_clz, rng):
     # rangeset is 2 element iterable, rangedict is 3 element iterable
     if len(rng) < 2:
-        raise ValueError("range length is at least 2 but {l}: {rng}".format(l=len(rng), rng=rng))
+        raise ValueError(f"range length is at least 2 but {len(rng)}: {rng}")
 
     return range_clz(*rng)
 
@@ -752,11 +737,7 @@ def bisect_left(a, x, lo=0, hi=None):
 
 def assert_compatible(left, right):
     if not is_compatible(left, right):
-        raise TypeError(
-            "{left} {ltyp} is incompatible with {right} {rtyp}".format(
-                left=repr(left), ltyp=type(left), right=repr(right), rtyp=type(right)
-            )
-        )
+        raise TypeError(f"{left!r} {type(left)} is incompatible with {right!r} {type(right)}")
 
 
 def is_compatible(left, right):
@@ -766,7 +747,4 @@ def is_compatible(left, right):
     if type(left) in compatible_types.get(type(right), ()):
         return True
 
-    if type(right) in compatible_types.get(type(left), ()):
-        return True
-
-    return False
+    return type(right) in compatible_types.get(type(left), ())
