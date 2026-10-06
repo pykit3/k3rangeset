@@ -99,6 +99,8 @@ class ValueRange(list):
 
         return rst
 
+    subtract = substract
+
     def cmp_left(self, pos):
         # left is None means it is negative infinite
         return cmp_val(self[0], pos, none_cmp_finite=-1)
@@ -599,6 +601,9 @@ def substract(a, *bs):
     return s
 
 
+subtract = substract
+
+
 def _substract(a, b):
     if len(a) == 0:
         return a.__class__([], range_clz=a.range_clz, dimension=a.dimension)
@@ -714,6 +719,9 @@ def union_range(a, b):
 
 def substract_range(a, b):
     return a.substract(b)
+
+
+subtract_range = substract_range
 
 
 def bisect_left(a, x, lo=0, hi=None):

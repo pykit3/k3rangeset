@@ -150,6 +150,17 @@ class TestRange(unittest.TestCase):
 
             self.assertEqual(expected, rst)
 
+            # test the correctly spelled aliases
+            rst = k3rangeset.subtract_range(a, b)
+            dd("rst:", rst)
+
+            self.assertEqual(expected, rst)
+
+            rst = a.subtract(b)
+            dd("rst:", rst)
+
+            self.assertEqual(expected, rst)
+
     def test_intersect(self):
         cases = (
             ([None, None], [None, None], [None, None]),
@@ -532,6 +543,12 @@ class TestRangeSet(unittest.TestCase):
             b = k3rangeset.RangeSet(b)
 
             rst = k3rangeset.substract(a, b)
+
+            dd("rst:", rst)
+
+            self.assertEqual(expected, rst)
+
+            rst = k3rangeset.subtract(a, b)
 
             dd("rst:", rst)
 

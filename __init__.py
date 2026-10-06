@@ -20,6 +20,8 @@ from .rangeset import (
     intersect,
     substract,
     substract_range,
+    subtract,
+    subtract_range,
     union,
 )
 
@@ -34,5 +36,7 @@ __all__ = [
     "intersect",
     "substract",
     "substract_range",
+    "subtract",
+    "subtract_range",
     "union",
 ]
