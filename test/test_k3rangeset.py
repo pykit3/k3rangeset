@@ -1,3 +1,4 @@
+import itertools
 import logging
 import unittest
 from typing import ClassVar
@@ -9,6 +10,25 @@ import k3rangeset
 dd = k3ut.dd
 
 logger = logging.getLogger(__name__)
+
+
+def _runs(points):
+    # Each run of consecutive points becomes one inclusive [first, last] pair.
+    rst = []
+    for p in sorted(points):
+        if rst and rst[-1][1] == p - 1:
+            rst[-1][1] = p
+        else:
+            rst.append([p, p])
+    return rst
+
+
+def _points_of(range_set, inclusive):
+    points = set()
+    for rng in range_set:
+        end = rng[1] + 1 if inclusive else rng[1]
+        points.update(range(rng[0], end))
+    return points
 
 
 class TestRange(unittest.TestCase):
@@ -1218,3 +1238,37 @@ class TestRangeDictMultiDimension(unittest.TestCase):
         r = k3rangeset.substract(r, k3rangeset.RangeDict([[0, 1.5, None]]))
         dd(r)
         self.assertRaises(KeyError, r.get, 0)
+
+
+class TestPointSetOracle(unittest.TestCase):
+    def test_point_set_oracle(self):
+        # Every set of the integers 0 to 5 is compared with a Python set of the same points.
+        point_sets = []
+        for k in range(7):
+            for points in itertools.combinations(range(6), k):
+                point_sets.append(set(points))
+
+        for clz, inclusive in ((k3rangeset.RangeSet, False), (k3rangeset.IntIncRangeSet, True)):
+            range_sets = []
+            for points in point_sets:
+                rngs = _runs(points)
+                if not inclusive:
+                    # A Range excludes its right boundary.
+                    rngs = [[first, last + 1] for first, last in rngs]
+                range_sets.append(clz(rngs))
+
+            for pa, a in zip(point_sets, range_sets):
+                for p in range(-1, 7):
+                    got = a.has(p)
+                    self.assertEqual(p in pa, got, f"{a}.has({p})")
+
+                for pb, b in zip(point_sets, range_sets):
+                    cases = (
+                        (k3rangeset.union, pa | pb),
+                        (k3rangeset.intersect, pa & pb),
+                        (k3rangeset.substract, pa - pb),
+                    )
+                    for func, expected in cases:
+                        rst = func(a, b)
+                        got = _points_of(rst, inclusive)
+                        self.assertEqual(expected, got, f"{func.__name__}({a}, {b})")
