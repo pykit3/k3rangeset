@@ -262,6 +262,22 @@ class TestRange(unittest.TestCase):
             rst = k3rangeset.ValueRange(*rng)
             self.assertEqual(expected, rst.val())
 
+    def test_value_range_substract(self):
+        a = k3rangeset.ValueRange(5, 10, "v")
+        cases = (
+            ([1, 2], [None, [5, 10, "v"]]),
+            ([12, 15], [[5, 10, "v"], None]),
+            ([6, 7], [[5, 6, "v"], [7, 10, "v"]]),
+        )
+
+        for b, expected in cases:
+            rst = a.substract(k3rangeset.ValueRange(*(b + ["w"])))
+            self.assertEqual(expected, rst, b)
+
+            pieces = [x for x in rst if x is not None]
+            for piece in pieces:
+                self.assertIs(k3rangeset.ValueRange, type(piece), b)
+
     def test_unicode(self):
         # fix: https://github.com/bsc-s2/pykit/issues/430
 

@@ -78,13 +78,12 @@ class ValueRange(list):
         return rst
 
     def substract(self, b):
+        # dup() keeps the value of a ValueRange.
         if self.cmp(b) > 0:
-            # keep value for ValueRange
-            return [None, self.dup() + self[2:]]
+            return [None, self.dup()]
 
         if self.cmp(b) < 0:
-            # keep value for ValueRange
-            return [self.dup() + self[2:], None]
+            return [self.dup(), None]
 
         # keep value for ValueRange
         rst = [None, None]
