@@ -725,6 +725,27 @@ class TestIntIncRangeSet(unittest.TestCase):
             rst = k3rangeset.union(b, a)
             self.assertEqual(expected, rst, "union(b, a)")
 
+    def test_int_inc_intersect(self):
+        # Both boundaries are inclusive: touching ranges share one integer, adjacent ranges share none.
+        cases = (
+            ([0, 1], [1, 2], [1, 1]),
+            ([1, 2], [0, 1], [1, 1]),
+            ([None, 1], [1, None], [1, 1]),
+            ([0, 1], [2, 3], None),
+            ([2, 3], [0, 1], None),
+            ([None, 1], [2, None], None),
+            ([0, 5], [2, 3], [2, 3]),
+        )
+
+        for a, b, expected in cases:
+            rng = k3rangeset.IntIncRange(*a)
+            rst = rng.intersect(b)
+            self.assertEqual(expected, rst, repr((a, b)))
+
+        rs = k3rangeset.IntIncRangeSet([[0, 1], [3, 4]])
+        rst = rs.find_overlapped([2, 3])
+        self.assertEqual([[3, 4]], rst)
+
     def test_int_inc_length(self):
         rst = k3rangeset.IntIncRangeSet([[1, 2], [5, 8]]).length()
         self.assertEqual(6, rst)

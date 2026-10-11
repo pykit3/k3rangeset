@@ -72,10 +72,15 @@ class ValueRange(list):
         else:
             rst[1] = self[1]
 
-        if rst[0] is not None and rst[0] == rst[1]:
+        if self._is_empty(rst[0], rst[1]):
             return None
 
         return rst
+
+    @staticmethod
+    def _is_empty(left, right):
+        # The right boundary is open, so [1, 1) has no element.
+        return left is not None and left == right
 
     def substract(self, b):
         # dup() keeps the value of a ValueRange.
@@ -250,6 +255,11 @@ class IntIncRange(Range):
 
     def is_adjacent(self, b):
         return None not in (b[0], self[1]) and self[1] + 1 == b[0]
+
+    @staticmethod
+    def _is_empty(left, right):
+        # Both boundaries are closed, so [1, 1] has 1, while adjacent ranges such as [0, 1] and [2, 3] meet at [2, 1].
+        return None not in (left, right) and left > right
 
     def has(self, pos):
         return (
