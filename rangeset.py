@@ -555,9 +555,14 @@ def _union(a, b):
         return RangeSet(a, range_clz=b.range_clz)
 
     rst = []
-    i, j = 1, 0
 
-    rng = a[0]
+    # Start from the earlier first range, so every later range starts no earlier than `rng`.
+    if a[0].cmp_left(b[0][0]) <= 0:
+        rng = a[0]
+        i, j = 1, 0
+    else:
+        rng = b[0]
+        i, j = 0, 1
 
     while i < len(a) or j < len(b):
         a_ge_b = None

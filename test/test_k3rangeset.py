@@ -488,6 +488,9 @@ class TestRangeSet(unittest.TestCase):
 
             self.assertEqual(expected, rst)
 
+            rst = k3rangeset.union(b, a)
+            self.assertEqual(expected, rst, "union(b, a)")
+
     def test_substract(self):
         cases = (
             ([[None, 10], [20, 30], [40, None]], [[None, None]], []),
@@ -702,6 +705,9 @@ class TestIntIncRangeSet(unittest.TestCase):
             dd("rst:", rst)
 
             self.assertEqual(expected, rst)
+
+            rst = k3rangeset.union(b, a)
+            self.assertEqual(expected, rst, "union(b, a)")
 
     def test_int_inc_length(self):
         rst = k3rangeset.IntIncRangeSet([[1, 2], [5, 8]]).length()
