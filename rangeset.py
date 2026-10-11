@@ -1,4 +1,4 @@
-int_types = (int, int)
+int_types = (int,)
 list_like = (type([]), type(()))
 
 compatible_types = {
